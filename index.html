@@ -70,7 +70,6 @@ button:hover { opacity:0.9; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDkc95D39bAFOAPs2dq8MvsO1ililfb1ro",
   authDomain: "labcontrol-2ddc7.firebaseapp.com",
@@ -82,7 +81,6 @@ const firebaseConfig = {
   measurementId: "G-3JVX3SD2GX"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const labRef = ref(db,'lab');
@@ -92,7 +90,6 @@ let selectedComputer = null;
 let role = 'teacher';
 let filter='all';
 
-// --- History and save ---
 function recordHistory(action){
   if(selectedComputer){
     if(!selectedComputer.history) selectedComputer.history = [];
@@ -104,7 +101,6 @@ function savePCs(){
   set(labRef, computers).catch(err=>console.error("خطأ في الحفظ:", err));
 }
 
-// --- Dashboard ---
 function renderDashboard(){
   const dash = document.getElementById("dashboard");
   dash.innerHTML = '';
@@ -139,7 +135,6 @@ function updateNotes(){
   }
 }
 
-// --- Actions ---
 function reserveComputer(){ updateNotes(); if(selectedComputer){selectedComputer.status='reserved'; recordHistory('محجوز'); renderDashboard(); savePCs(); } }
 function markMaintenance(){ updateNotes(); if(selectedComputer && role==='it'){selectedComputer.status='maintenance'; recordHistory('صيانة'); renderDashboard(); savePCs(); } }
 function markAvailable(){ updateNotes(); if(selectedComputer){selectedComputer.status='available'; recordHistory('متاح'); renderDashboard(); savePCs(); } }
@@ -162,7 +157,6 @@ function makeAllAvailable(){
 function filterStatus(status){ filter=status; renderDashboard(); }
 function switchRole(){ role=document.getElementById("roleSelect").value; document.getElementById("controlPanel").style.display='none'; renderDashboard(); }
 
-// --- Analytics ---
 function updateAnalytics(){
   const total = computers.length;
   const available = computers.filter(c=>c.status==='available').length;
@@ -172,7 +166,6 @@ function updateAnalytics(){
     `عدد الأجهزة الكلي: ${total} <br> متاحة: ${available} <br> محجوزة: ${reserved} <br> صيانة: ${maintenance}`;
 }
 
-// --- Initialize devices safely ---
 onValue(labRef, snapshot => {
   if(snapshot.exists()){
     computers = snapshot.val();
@@ -192,7 +185,6 @@ onValue(labRef, snapshot => {
   renderDashboard();
 });
 
-// --- Make functions global for inline onclick ---
 window.reserveComputer = reserveComputer;
 window.markMaintenance = markMaintenance;
 window.markAvailable = markAvailable;
@@ -205,3 +197,4 @@ window.switchRole = switchRole;
 
 </body>
 </html>
+
