@@ -4,36 +4,48 @@
 <meta charset="UTF-8">
 <title>أداة مختبر الحاسوب</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body { font-family:'Inter', sans-serif; background:#f5f6f8; margin:0; direction:rtl; }
 header { background:#ffffff; box-shadow:0 2px 5px rgba(0,0,0,0.05); padding:20px; text-align:center; position:sticky; top:0; z-index:10; }
-h1 { margin:0; font-weight:500; font-size:24px; color:#1f2937; }
-.role-select { margin-top:10px; font-size:16px; padding:5px 10px; border-radius:6px; border:1px solid #ccc; }
-.container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; padding:20px; }
-.computer { width:140px; height:100px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:600; color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.08); transition:transform 0.2s, box-shadow 0.2s; text-align:center; }
+h1 { margin:0; font-weight:600; font-size:26px; color:#1f2937; }
+.role-select { margin-top:10px; font-size:16px; padding:5px 12px; border-radius:6px; border:1px solid #ccc; }
+.container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; padding:20px; transition: all 0.3s; }
+.computer { width:140px; height:100px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:600; color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.08); transition:transform 0.2s, box-shadow 0.2s, background 0.3s; text-align:center; position:relative; }
 .computer:hover { transform:translateY(-4px); box-shadow:0 6px 16px rgba(0,0,0,0.12); }
-.available { background:#34d399; }
-.reserved { background:#fbbf24; }
-.maintenance { background:#f87171; }
-.control-panel { background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-width:380px; margin:20px auto; padding:20px; text-align:center; }
-.control-panel h3 { margin-top:0; color:#111827; }
+.computer.selected { border:3px solid #2563eb; }
+
+.available { background:#22c55e; }
+.reserved { background:#f59e0b; }
+.maintenance { background:#ef4444; }
+
+.control-panel { background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-width:420px; margin:20px auto; padding:20px; display:none; transition: all 0.3s; }
+.control-panel h3 { margin-top:0; color:#111827; text-align:center; }
 textarea { width:100%; padding:8px; margin:10px 0; border-radius:8px; border:1px solid #ccc; resize:none; font-family:'Inter'; font-size:14px; }
-button { padding:8px 14px; margin:5px; border:none; border-radius:8px; font-weight:500; cursor:pointer; transition:background 0.2s; }
+button { padding:8px 14px; margin:5px; border:none; border-radius:8px; font-weight:500; cursor:pointer; transition:all 0.2s; }
 .reserve-btn { background:#3b82f6; color:#fff; }
-.maintenance-btn { background:#ef4444; color:#fff; }
+.maintenance-btn { background:#dc2626; color:#fff; }
 .available-btn { background:#10b981; color:#fff; }
 .all-btn { background:#6366f1; color:#fff; }
 .make-all-available-btn { background:#06b6d4; color:#fff; }
 .filter-btn { background:#f97316; color:#fff; }
 button:hover { opacity:0.9; }
-.analytics { max-width:380px; margin:20px auto; background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+.analytics { max-width:420px; margin:20px auto; background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+.history-panel { max-width:420px; margin:20px auto; background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+.search-input { width:calc(100% - 20px); padding:8px 10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc; font-size:14px; }
+.status-legend { display:flex; justify-content:space-around; max-width:420px; margin:10px auto; }
+.legend-item { display:flex; align-items:center; gap:5px; font-size:14px; }
+.legend-color { width:16px; height:16px; border-radius:4px; }
+@media (max-width:600px) {
+  .computer { width:100px; height:80px; font-size:12px; }
+}
 </style>
 </head>
 <body>
 
 <header>
 <h1>أداة مختبر الحاسوب</h1>
-  <h4>عمل الطالب عمر أبو بكر</h4>
+<h4>عمل الطالب عمر أبو بكر</h4>
 <label>اختر الدور:</label>
 <select id="roleSelect" class="role-select" onchange="switchRole()">
   <option value="teacher">المعلم</option>
@@ -41,19 +53,29 @@ button:hover { opacity:0.9; }
 </select>
 </header>
 
+<div class="search-bar" style="text-align:center;">
+  <input type="text" id="searchInput" class="search-input" placeholder="ابحث عن جهاز..." oninput="renderDashboard()">
+</div>
+
+<div class="status-legend">
+  <div class="legend-item"><div class="legend-color available"></div>متاح</div>
+  <div class="legend-item"><div class="legend-color reserved"></div>محجوز</div>
+  <div class="legend-item"><div class="legend-color maintenance"></div>صيانة</div>
+</div>
+
 <div class="container" id="dashboard"></div>
 
-<div class="control-panel" id="controlPanel" style="display:none;">
+<div class="control-panel" id="controlPanel">
 <h3 id="selectedComputerName">اختر جهاز</h3>
-<textarea id="computerNotes" placeholder="اكتب ملاحظة..."></textarea>
-<div>
+<textarea id="computerNotes" placeholder="اكتب ملاحظة..." oninput="updateNotes()"></textarea>
+<div style="text-align:center;">
 <button class="reserve-btn" onclick="reserveComputer()">حجز الجهاز</button>
 <button class="maintenance-btn" onclick="markMaintenance()">وضع في الصيانة</button>
 <button class="available-btn" onclick="markAvailable()">متاح</button>
 <button class="all-btn" onclick="reserveAll()">حجز جميع الأجهزة</button>
 <button class="make-all-available-btn" onclick="makeAllAvailable()">جعل جميع الأجهزة متاحة</button>
 </div>
-<div>
+<div style="text-align:center; margin-top:10px;">
 <button class="filter-btn" onclick="filterStatus('available')">عرض المتاحة</button>
 <button class="filter-btn" onclick="filterStatus('reserved')">عرض المحجوزة</button>
 <button class="filter-btn" onclick="filterStatus('maintenance')">عرض الصيانة</button>
@@ -63,7 +85,12 @@ button:hover { opacity:0.9; }
 
 <div class="analytics" id="analyticsPanel">
 <h3>تحليلات المختبر</h3>
-<div id="analyticsContent">جاري حساب الإحصائيات...</div>
+<canvas id="statusChart" height="120"></canvas>
+</div>
+
+<div class="history-panel" id="historyPanel">
+<h3>تاريخ الجهاز</h3>
+<div id="historyContent">اختر جهاز لعرض التاريخ</div>
 </div>
 
 <script type="module">
@@ -90,24 +117,22 @@ let selectedComputer = null;
 let role = 'teacher';
 let filter='all';
 
-function recordHistory(action){
-  if(selectedComputer){
-    if(!selectedComputer.history) selectedComputer.history = [];
-    selectedComputer.history.push({action, time:new Date().toLocaleString()});
-  }
+function logAction(pc, action){
+  if(!pc.history) pc.history=[];
+  pc.history.push({action, time:new Date().toLocaleString()});
 }
 
-function savePCs(){
-  set(labRef, computers).catch(err=>console.error("خطأ في الحفظ:", err));
-}
+function savePCs(){ set(labRef, computers).catch(err=>console.error("خطأ في الحفظ:", err)); }
 
 function renderDashboard(){
   const dash = document.getElementById("dashboard");
-  dash.innerHTML = '';
-  computers.filter(c => filter==='all' || c.status===filter).forEach(c=>{
-    if(!c.history) c.history = [];
-    const div = document.createElement('div');
-    div.className=`computer ${c.status}`;
+  const searchTerm = document.getElementById("searchInput").value.trim();
+  dash.innerHTML='';
+  computers.filter(c => (filter==='all'||c.status===filter) && (!searchTerm || c.name.includes(searchTerm)))
+  .forEach(c=>{
+    if(!c.history) c.history=[];
+    const div=document.createElement('div');
+    div.className=`computer ${c.status}${selectedComputer && selectedComputer.id===c.id ? ' selected':''}`;
     div.innerText=c.name;
     div.title=`الحالة: ${c.status==='available'?'متاح':c.status==='reserved'?'محجوز':'صيانة'}\nالملاحظات: ${c.notes || "لا يوجد"}`;
     div.onclick=()=>selectComputer(c.id);
@@ -118,69 +143,78 @@ function renderDashboard(){
 
 function selectComputer(id){
   selectedComputer = computers.find(c=>c.id===id);
-  if(!selectedComputer.history) selectedComputer.history = [];
   document.getElementById("selectedComputerName").innerText=selectedComputer.name;
-  document.getElementById("computerNotes").value=selectedComputer.notes;
-
+  document.getElementById("computerNotes").value=selectedComputer.notes || '';
   if(role==='teacher' && selectedComputer.status==='maintenance'){
     alert("هذا الجهاز تحت الصيانة!");
     return;
   }
   document.getElementById("controlPanel").style.display='block';
+  renderHistory();
+  renderDashboard();
 }
 
 function updateNotes(){
-  if(selectedComputer){
-    selectedComputer.notes=document.getElementById("computerNotes").value;
-  }
+  if(selectedComputer) selectedComputer.notes=document.getElementById("computerNotes").value;
 }
 
-function reserveComputer(){ updateNotes(); if(selectedComputer){selectedComputer.status='reserved'; recordHistory('محجوز'); renderDashboard(); savePCs(); } }
-function markMaintenance(){ updateNotes(); if(selectedComputer && role==='it'){selectedComputer.status='maintenance'; recordHistory('صيانة'); renderDashboard(); savePCs(); } }
-function markAvailable(){ updateNotes(); if(selectedComputer){selectedComputer.status='available'; recordHistory('متاح'); renderDashboard(); savePCs(); } }
+function reserveComputer(){ if(selectedComputer){ selectedComputer.status='reserved'; logAction(selectedComputer,'محجوز'); renderDashboard(); savePCs(); renderHistory(); } }
+function markMaintenance(){ if(selectedComputer && role==='it'){ selectedComputer.status='maintenance'; logAction(selectedComputer,'صيانة'); renderDashboard(); savePCs(); renderHistory(); } }
+function markAvailable(){ if(selectedComputer){ selectedComputer.status='available'; logAction(selectedComputer,'متاح'); renderDashboard(); savePCs(); renderHistory(); } }
+
 function reserveAll(){
   computers.forEach(c=>{
-    if(!c.history) c.history = [];
-    if(role==='teacher' && c.status!=='maintenance'){c.status='reserved'; c.history.push({action:'محجوز', time:new Date().toLocaleString()});} 
-    else if(role==='it'){c.status='reserved'; c.history.push({action:'محجوز', time:new Date().toLocaleString()});}
+    if(!c.history) c.history=[];
+    if(role==='teacher' && c.status!=='maintenance'){c.status='reserved'; logAction(c,'محجوز');} 
+    else if(role==='it'){c.status='reserved'; logAction(c,'محجوز');}
   });
   renderDashboard(); savePCs();
 }
 function makeAllAvailable(){
-  computers.forEach(c=>{
-    if(!c.history) c.history = [];
-    c.status='available';
-    c.history.push({action:'متاح', time:new Date().toLocaleString()});
-  });
+  computers.forEach(c=>{ if(!c.history) c.history=[]; c.status='available'; logAction(c,'متاح'); });
   renderDashboard(); savePCs();
 }
+
 function filterStatus(status){ filter=status; renderDashboard(); }
 function switchRole(){ role=document.getElementById("roleSelect").value; document.getElementById("controlPanel").style.display='none'; renderDashboard(); }
 
+function renderHistory(){
+  const panel = document.getElementById("historyContent");
+  if(selectedComputer && selectedComputer.history.length){
+    panel.innerHTML = selectedComputer.history.slice(-5).reverse().map(h=>`• ${h.time} → ${h.action}`).join('<br>');
+  } else { panel.innerHTML = 'لا يوجد تاريخ بعد'; }
+}
+
+let chartInstance = null;
 function updateAnalytics(){
   const total = computers.length;
   const available = computers.filter(c=>c.status==='available').length;
   const reserved = computers.filter(c=>c.status==='reserved').length;
   const maintenance = computers.filter(c=>c.status==='maintenance').length;
-  document.getElementById('analyticsContent').innerHTML=
-    `عدد الأجهزة الكلي: ${total} <br> متاحة: ${available} <br> محجوزة: ${reserved} <br> صيانة: ${maintenance}`;
+
+  const ctx = document.getElementById('statusChart').getContext('2d');
+  if(chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels:['متاح','محجوز','صيانة'],
+      datasets:[{
+        label:'عدد الأجهزة',
+        data:[available,reserved,maintenance],
+        backgroundColor:['#22c55e','#f59e0b','#ef4444']
+      }]
+    },
+    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+  });
 }
 
-onValue(labRef, snapshot => {
+onValue(labRef, snapshot=>{
   if(snapshot.exists()){
     computers = snapshot.val();
-    computers.forEach(c=>{ if(!c.history) c.history = []; });
-
-    for(let i=1; i<=23; i++){
-      if(!computers.find(c=>c.id===i)){
-        computers.push({id:i, name:`جهاز-${i.toString().padStart(2,'0')}`, status:'available', notes:'', history:[]});
-      }
-    }
-
+    computers.forEach(c=>{ if(!c.history) c.history=[]; });
+    for(let i=1;i<=23;i++){ if(!computers.find(c=>c.id===i)){ computers.push({id:i,name:`جهاز-${i.toString().padStart(2,'0')}`,status:'available',notes:'',history:[]}); } }
   } else {
-    for(let i=1;i<=23;i++){
-      computers.push({id:i, name:`جهاز-${i.toString().padStart(2,'0')}`, status:'available', notes:'', history:[]});
-    }
+    for(let i=1;i<=23;i++){ computers.push({id:i,name:`جهاز-${i.toString().padStart(2,'0')}`,status:'available',notes:'',history:[]}); }
   }
   renderDashboard();
 });
@@ -192,9 +226,7 @@ window.reserveAll = reserveAll;
 window.makeAllAvailable = makeAllAvailable;
 window.filterStatus = filterStatus;
 window.switchRole = switchRole;
-
 </script>
 
 </body>
 </html>
-
