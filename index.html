@@ -2,55 +2,231 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>أداة مختبر الحاسوب</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body { font-family:'Inter', sans-serif; background:#f5f6f8; margin:0; direction:rtl; }
-header { background:#ffffff; box-shadow:0 2px 5px rgba(0,0,0,0.05); padding:20px; text-align:center; position:sticky; top:0; z-index:10; }
-h1 { margin:0; font-weight:600; font-size:26px; color:#1f2937; }
-.role-select { margin-top:10px; font-size:16px; padding:5px 12px; border-radius:6px; border:1px solid #ccc; }
-.container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; padding:20px; transition: all 0.3s; }
-.computer { width:140px; height:100px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:600; color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.08); transition:transform 0.2s, box-shadow 0.2s, background 0.3s; text-align:center; position:relative; }
-.computer:hover { transform:translateY(-4px); box-shadow:0 6px 16px rgba(0,0,0,0.12); }
-.computer.selected { border:3px solid #2563eb; }
+:root {
+  --bg-color: #f5f6f8;
+  --text-color: #1f2937;
+  --panel-bg: #ffffff;
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  --border: 1px solid #ccc;
+  --chart-font-color: #1f2937;
+}
 
-.available { background:#22c55e; }
-.reserved { background:#f59e0b; }
-.maintenance { background:#ef4444; }
+[data-theme="dark"] {
+  --bg-color: #1f2937;
+  --text-color: #f5f6f8;
+  --panel-bg: #374151;
+  --border: 1px solid #4b5563;
+  --chart-font-color: #f5f6f8;
+}
 
-.control-panel { background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); max-width:420px; margin:20px auto; padding:20px; display:none; transition: all 0.3s; }
-.control-panel h3 { margin-top:0; color:#111827; text-align:center; }
-textarea { width:100%; padding:8px; margin:10px 0; border-radius:8px; border:1px solid #ccc; resize:none; font-family:'Inter'; font-size:14px; }
-button { padding:8px 14px; margin:5px; border:none; border-radius:8px; font-weight:500; cursor:pointer; transition:all 0.2s; }
-.reserve-btn { background:#3b82f6; color:#fff; }
-.maintenance-btn { background:#dc2626; color:#fff; }
-.available-btn { background:#10b981; color:#fff; }
-.all-btn { background:#6366f1; color:#fff; }
-.make-all-available-btn { background:#06b6d4; color:#fff; }
-.filter-btn { background:#f97316; color:#fff; }
-button:hover { opacity:0.9; }
-.analytics { max-width:420px; margin:20px auto; background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
-.history-panel { max-width:420px; margin:20px auto; background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
-.search-input { width:calc(100% - 20px); padding:8px 10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc; font-size:14px; }
-.status-legend { display:flex; justify-content:space-around; max-width:420px; margin:10px auto; }
-.legend-item { display:flex; align-items:center; gap:5px; font-size:14px; }
-.legend-color { width:16px; height:16px; border-radius:4px; }
-@media (max-width:600px) {
-  .computer { width:100px; height:80px; font-size:12px; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  direction: rtl;
+  transition: all 0.3s;
+}
+
+header {
+  background: var(--panel-bg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+h1 { margin: 0; font-weight: 600; font-size: 26px; }
+h4 { margin: 5px 0; color: #6b7280; }
+
+.role-select {
+  margin-top: 10px;
+  font-size: 16px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: var(--border);
+  background: var(--panel-bg);
+  color: var(--text-color);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { opacity: 0.9; }
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.computer {
+  width: 140px; height: 100px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+  text-align: center;
+  position: relative;
+}
+.computer:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+.computer.selected { border: 3px solid #2563eb; }
+
+.available { background: #22c55e; }
+.reserved { background: #f59e0b; }
+.maintenance { background: #ef4444; }
+
+.control-panel, .analytics, .history-panel, .calendar-panel {
+  background: var(--panel-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.control-panel h3, .analytics h3, .history-panel h3, .calendar-panel h3 {
+  margin-top: 0;
+  color: var(--text-color);
+  text-align: center;
+  font-size: 18px;
+}
+
+textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: var(--border);
+  resize: none;
+  font-family: 'Inter';
+  font-size: 14px;
+  background: var(--panel-bg);
+  color: var(--text-color);
+}
+
+button {
+  padding: 8px 14px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+button:hover { opacity: 0.9; transform: scale(1.05); }
+
+.reserve-btn { background: #3b82f6; color: #fff; }
+.maintenance-btn { background: #dc2626; color: #fff; }
+.available-btn { background: #10b981; color: #fff; }
+.all-btn { background: #6366f1; color: #fff; }
+.make-all-available-btn { background: #06b6d4; color: #fff; }
+.filter-btn { background: #f97316; color: #fff; }
+.export-btn { background: #8b5cf6; color: #fff; }
+
+.search-input {
+  width: calc(100% - 20px);
+  padding: 8px 10px;
+  margin: 10px auto;
+  border-radius: 8px;
+  border: var(--border);
+  font-size: 14px;
+  background: var(--panel-bg);
+  color: var(--text-color);
+  display: block;
+}
+
+.status-legend {
+  display: flex;
+  justify-content: space-around;
+  max-width: 420px;
+  margin: 10px auto;
+}
+
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+.legend-color { width: 16px; height: 16px; border-radius: 4px; }
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: none;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: #10b981; color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  opacity: 0; transition: opacity 0.3s;
+  z-index: 100;
+}
+.toast.show { opacity: 1; }
+.toast.error { background: #ef4444; }
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+.calendar-day {
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--panel-bg);
+  border: var(--border);
+}
+.calendar-day:hover { background: #e5e7eb; }
+.calendar-day.selected { background: #3b82f6; color: #fff; }
+
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  .control-panel, .analytics, .history-panel, .calendar-panel { max-width: 100%; margin: 10px; }
+  .computer { width: 90px; height: 70px; font-size: 11px; }
+  h3 { font-size: 16px; }
+  button { padding: 6px 10px; font-size: 12px; }
+  .calendar-day { padding: 8px; font-size: 12px; }
 }
 </style>
 </head>
 <body>
-
 <header>
-<h1>أداة مختبر الحاسوب</h1>
-<h4>عمل الطالب عمر أبو بكر</h4>
-<label>اختر الدور:</label>
-<select id="roleSelect" class="role-select" onchange="switchRole()">
-  <option value="teacher">المعلم</option>
-  <option value="it">مسؤول مختبر الحاسوب</option>
-</select>
+  <h1>أداة مختبر الحاسوب</h1>
+  <h4>عمل الطالب عمر أبو بكر</h4>
+  <button id="themeToggle" class="theme-toggle">🌙 تبديل الوضع</button>
+  <label>اختر الدور:</label>
+  <select id="roleSelect" class="role-select" onchange="switchRole()">
+    <option value="teacher">المعلم</option>
+    <option value="it">مسؤول مختبر الحاسوب</option>
+  </select>
 </header>
 
 <div class="search-bar" style="text-align:center;">
@@ -64,34 +240,54 @@ button:hover { opacity:0.9; }
 </div>
 
 <div class="container" id="dashboard"></div>
+<div id="spinner" class="spinner"></div>
 
-<div class="control-panel" id="controlPanel">
-<h3 id="selectedComputerName">اختر جهاز</h3>
-<textarea id="computerNotes" placeholder="اكتب ملاحظة..." oninput="updateNotes()"></textarea>
-<div style="text-align:center;">
-<button class="reserve-btn" onclick="reserveComputer()">حجز الجهاز</button>
-<button class="maintenance-btn" onclick="markMaintenance()">وضع في الصيانة</button>
-<button class="available-btn" onclick="markAvailable()">متاح</button>
-<button class="all-btn" onclick="reserveAll()">حجز جميع الأجهزة</button>
-<button class="make-all-available-btn" onclick="makeAllAvailable()">جعل جميع الأجهزة متاحة</button>
+<div class="control-panel" id="controlPanel" style="display:none;">
+  <h3 id="selectedComputerName">اختر جهاز</h3>
+  <textarea id="computerNotes" placeholder="اكتب ملاحظة..."></textarea>
+  <div style="text-align:center;">
+    <button class="reserve-btn" onclick="reserveComputer()">حجز الجهاز</button>
+    <button class="maintenance-btn" onclick="markMaintenance()">وضع في الصيانة</button>
+    <button class="available-btn" onclick="markAvailable()">متاح</button>
+    <button class="all-btn" onclick="reserveAll()">حجز جميع الأجهزة</button>
+    <button class="make-all-available-btn" onclick="makeAllAvailable()">جعل جميع الأجهزة متاحة</button>
+  </div>
+  <div style="text-align:center; margin-top:10px;">
+    <button class="filter-btn" onclick="filterStatus('available')">عرض المتاحة</button>
+    <button class="filter-btn" onclick="filterStatus('reserved')">عرض المحجوزة</button>
+    <button class="filter-btn" onclick="filterStatus('maintenance')">عرض الصيانة</button>
+    <button class="filter-btn" onclick="filterStatus('all')">عرض الكل</button>
+  </div>
 </div>
-<div style="text-align:center; margin-top:10px;">
-<button class="filter-btn" onclick="filterStatus('available')">عرض المتاحة</button>
-<button class="filter-btn" onclick="filterStatus('reserved')">عرض المحجوزة</button>
-<button class="filter-btn" onclick="filterStatus('maintenance')">عرض الصيانة</button>
-<button class="filter-btn" onclick="filterStatus('all')">عرض الكل</button>
-</div>
+
+<div class="calendar-panel" id="calendarPanel">
+  <h3>جدول الحجوزات</h3>
+  <input type="date" id="calendarDate" class="search-input" onchange="renderCalendar()">
+
+  <!-- NEW time inputs -->
+  <div style="display:flex; gap:10px; margin:10px 0;">
+    <label>من: <input type="time" id="startTime" value="08:00"></label>
+    <label>إلى: <input type="time" id="endTime" value="09:00"></label>
+  </div>
+
+  <div id="calendarContent" class="calendar"></div>
+  <div id="dayReservations" style="margin-top:10px; font-size:14px;"></div>
 </div>
 
 <div class="analytics" id="analyticsPanel">
-<h3>تحليلات المختبر</h3>
-<canvas id="statusChart" height="120"></canvas>
+  <h3>تحليلات المختبر</h3>
+  <button class="export-btn" onclick="exportReport()">تصدير تقرير</button>
+  <div style="height:300px; position:relative;">
+    <canvas id="statusChart"></canvas>
+  </div>
 </div>
 
 <div class="history-panel" id="historyPanel">
-<h3>تاريخ الجهاز</h3>
-<div id="historyContent">اختر جهاز لعرض التاريخ</div>
+  <h3>تاريخ الجهاز</h3>
+  <div id="historyContent">اختر جهاز لعرض التاريخ</div>
 </div>
+
+<div id="toast" class="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -110,115 +306,319 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const labRef = ref(db,'lab');
+const labRef = ref(db, 'lab');
 
 let computers = [];
 let selectedComputer = null;
 let role = 'teacher';
-let filter='all';
+let filter = 'all';
+let selectedDate = new Date().toISOString().split('T')[0];
+let chartInstance = null;
 
-function logAction(pc, action){
-  if(!pc.history) pc.history=[];
-  pc.history.push({action, time:new Date().toLocaleString()});
+// ✅ labReserved separate from computers array
+let labReserved = null;
+let labAvailable = null;
+let selectedCalendarDay = selectedDate;
+
+
+// ----------------- Firebase listener -----------------
+onValue(labRef, snapshot => {
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+
+    labReserved = data.labReserved || null;
+    labAvailable = data.labAvailable || null;
+
+    computers = Array.isArray(data.computers) ? data.computers : Object.values(data.computers || {});
+    computers.forEach(c => { if (!c.history) c.history = []; if(!c.reservations) c.reservations = {}; });
+
+    // Fill missing IDs up to 23
+    for (let i = 1; i <= 23; i++) {
+      if (!computers.find(c => c.id === i)) {
+        computers.push({ id: i, name: `جهاز-${i.toString().padStart(2, '0')}`, status: 'available', notes: '', history: [], reservations: {} });
+      }
+    }
+  } else {
+    labReserved = null;
+    labAvailable = null;
+    computers = [];
+    for (let i = 1; i <= 23; i++) {
+      computers.push({ id: i, name: `جهاز-${i.toString().padStart(2, '0')}`, status: 'available', notes: '', history: [], reservations: {} });
+    }
+  }
+
+  renderDashboard();
+  renderCalendar();
+  renderDayReservations();
+});
+
+
+// ----------------- Utility functions -----------------
+function showToast(message, isError = false) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = `toast ${isError ? 'error' : ''} show`;
+  setTimeout(() => toast.className = 'toast', 3000);
 }
 
-function savePCs(){ set(labRef, computers).catch(err=>console.error("خطأ في الحفظ:", err)); }
+function logAction(pc, action) {
+  if (!pc.history) pc.history = [];
+  pc.history.push({ action, time: new Date().toLocaleString(), date: selectedDate });
+}
 
-function renderDashboard(){
+function savePCs() {
+  document.getElementById("spinner").style.display = "block";
+  set(labRef, { computers, labReserved, labAvailable })  // ✅ save extra info
+    .then(() => {
+      document.getElementById("spinner").style.display = "none";
+      showToast("تم الحفظ بنجاح");
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("spinner").style.display = "none";
+      showToast("خطأ في الحفظ", true);
+    });
+}
+
+
+function updateAnalytics() {
+  const total = computers.length;
+  const available = computers.filter(c => c.status === 'available').length;
+  const reserved = computers.filter(c => c.status === 'reserved').length;
+  const maintenance = computers.filter(c => c.status === 'maintenance').length;
+
+  const ctx = document.getElementById('statusChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [
+        `متاح (${((available / total) * 100).toFixed(1)}%)`,
+        `محجوز (${((reserved / total) * 100).toFixed(1)}%)`,
+        `صيانة (${((maintenance / total) * 100).toFixed(1)}%)`
+      ],
+      datasets: [{
+        label: 'عدد الأجهزة',
+        data: [available, reserved, maintenance],
+        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+        borderColor: ['#fff', '#fff', '#fff'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { family: 'Inter', size: 14 },
+            color: getComputedStyle(document.body).getPropertyValue('--chart-font-color').trim()
+          }
+        }
+      },
+      maintainAspectRatio: false
+    }
+  });
+}
+
+// ----------------- Dashboard -----------------
+function renderDashboard() {
   const dash = document.getElementById("dashboard");
   const searchTerm = document.getElementById("searchInput").value.trim();
-  dash.innerHTML='';
-  computers.filter(c => (filter==='all'||c.status===filter) && (!searchTerm || c.name.includes(searchTerm)))
-  .forEach(c=>{
-    if(!c.history) c.history=[];
-    const div=document.createElement('div');
-    div.className=`computer ${c.status}${selectedComputer && selectedComputer.id===c.id ? ' selected':''}`;
-    div.innerText=c.name;
-    div.title=`الحالة: ${c.status==='available'?'متاح':c.status==='reserved'?'محجوز':'صيانة'}\nالملاحظات: ${c.notes || "لا يوجد"}`;
-    div.onclick=()=>selectComputer(c.id);
-    dash.appendChild(div);
-  });
+  dash.innerHTML = '';
+  computers
+    .filter(c => (filter === 'all' || c.status === filter) && (!searchTerm || c.name.includes(searchTerm)))
+    .forEach(c => {
+      if (!c.history) c.history = [];
+      if (!c.reservations) c.reservations = {};
+      const div = document.createElement('div');
+      div.className = `computer ${c.status}${selectedComputer && selectedComputer.id === c.id ? ' selected' : ''}`;
+      div.innerText = c.name;
+      div.onclick = () => selectComputer(c.id);
+      dash.appendChild(div);
+    });
   updateAnalytics();
 }
 
-function selectComputer(id){
-  selectedComputer = computers.find(c=>c.id===id);
-  document.getElementById("selectedComputerName").innerText=selectedComputer.name;
-  document.getElementById("computerNotes").value=selectedComputer.notes || '';
-  if(role==='teacher' && selectedComputer.status==='maintenance'){
-    alert("هذا الجهاز تحت الصيانة!");
-    return;
-  }
-  document.getElementById("controlPanel").style.display='block';
+function selectComputer(id) {
+  selectedComputer = computers.find(c => c.id === id);
+  document.getElementById("selectedComputerName").innerText = selectedComputer.name;
+  document.getElementById("computerNotes").value = selectedComputer.notes || '';
+  document.getElementById("controlPanel").style.display = 'block';
   renderHistory();
   renderDashboard();
 }
 
-function updateNotes(){
-  if(selectedComputer) selectedComputer.notes=document.getElementById("computerNotes").value;
-}
-
-function reserveComputer(){ if(selectedComputer){ selectedComputer.status='reserved'; logAction(selectedComputer,'محجوز'); renderDashboard(); savePCs(); renderHistory(); } }
-function markMaintenance(){ if(selectedComputer && role==='it'){ selectedComputer.status='maintenance'; logAction(selectedComputer,'صيانة'); renderDashboard(); savePCs(); renderHistory(); } }
-function markAvailable(){ if(selectedComputer){ selectedComputer.status='available'; logAction(selectedComputer,'متاح'); renderDashboard(); savePCs(); renderHistory(); } }
-
-function reserveAll(){
-  computers.forEach(c=>{
-    if(!c.history) c.history=[];
-    if(role==='teacher' && c.status!=='maintenance'){c.status='reserved'; logAction(c,'محجوز');} 
-    else if(role==='it'){c.status='reserved'; logAction(c,'محجوز');}
-  });
-  renderDashboard(); savePCs();
-}
-function makeAllAvailable(){
-  computers.forEach(c=>{ if(!c.history) c.history=[]; c.status='available'; logAction(c,'متاح'); });
-  renderDashboard(); savePCs();
-}
-
-function filterStatus(status){ filter=status; renderDashboard(); }
-function switchRole(){ role=document.getElementById("roleSelect").value; document.getElementById("controlPanel").style.display='none'; renderDashboard(); }
-
-function renderHistory(){
-  const panel = document.getElementById("historyContent");
-  if(selectedComputer && selectedComputer.history.length){
-    panel.innerHTML = selectedComputer.history.slice(-5).reverse().map(h=>`• ${h.time} → ${h.action}`).join('<br>');
-  } else { panel.innerHTML = 'لا يوجد تاريخ بعد'; }
-}
-
-let chartInstance = null;
-function updateAnalytics(){
-  const total = computers.length;
-  const available = computers.filter(c=>c.status==='available').length;
-  const reserved = computers.filter(c=>c.status==='reserved').length;
-  const maintenance = computers.filter(c=>c.status==='maintenance').length;
-
-  const ctx = document.getElementById('statusChart').getContext('2d');
-  if(chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type:'doughnut',
-    data:{
-      labels:['متاح','محجوز','صيانة'],
-      datasets:[{
-        label:'عدد الأجهزة',
-        data:[available,reserved,maintenance],
-        backgroundColor:['#22c55e','#f59e0b','#ef4444']
-      }]
-    },
-    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
-  });
-}
-
-onValue(labRef, snapshot=>{
-  if(snapshot.exists()){
-    computers = snapshot.val();
-    computers.forEach(c=>{ if(!c.history) c.history=[]; });
-    for(let i=1;i<=23;i++){ if(!computers.find(c=>c.id===i)){ computers.push({id:i,name:`جهاز-${i.toString().padStart(2,'0')}`,status:'available',notes:'',history:[]}); } }
-  } else {
-    for(let i=1;i<=23;i++){ computers.push({id:i,name:`جهاز-${i.toString().padStart(2,'0')}`,status:'available',notes:'',history:[]}); }
-  }
+// ----------------- Actions -----------------
+function reserveComputer() {
+  if (!selectedComputer) return;
+  const start = document.getElementById("startTime").value || "08:00";
+  const end = document.getElementById("endTime").value || "09:00";
+  selectedComputer.status = 'reserved';
+  selectedComputer.reservations[selectedDate] = { status: 'reserved', start, end };
+  logAction(selectedComputer, `محجوز من ${start} إلى ${end}`);
+  savePCs();
   renderDashboard();
-});
+  renderDayReservations();
+}
 
+function markMaintenance() {
+  if (!selectedComputer) return;
+  selectedComputer.status = 'maintenance';
+  logAction(selectedComputer, 'تم وضعه في الصيانة');
+  savePCs();
+  renderDashboard();
+}
+
+function markAvailable() {
+  if (!selectedComputer) return;
+  selectedComputer.status = 'available';
+  logAction(selectedComputer, 'تم جعله متاح');
+  savePCs();
+  renderDashboard();
+}
+
+// ----------------- Reserve All & Make All Available -----------------
+function reserveAll() {
+  const start = document.getElementById("startTime").value || "08:00";
+  const end = document.getElementById("endTime").value || "09:00";
+
+  computers.forEach(c => {
+    if (role === 'teacher' && c.status !== 'maintenance' || role === 'it') {
+      c.status = 'reserved';
+      if (!c.reservations) c.reservations = {};
+      c.reservations[selectedDate] = { status: 'reserved', start, end };
+      logAction(c, `محجوز من ${start} إلى ${end}`);
+    }
+  });
+
+  labReserved = { date: selectedDate, start, end };
+  labAvailable = null; // ✅ clear available if lab reserved
+  renderDashboard();
+  savePCs();
+  renderDayReservations();
+  showToast(`كل المختبر محجوز من ${start} إلى ${end}`);
+}
+
+
+function makeAllAvailable() {
+  const start = document.getElementById("startTime").value || "08:00";
+  const end = document.getElementById("endTime").value || "09:00";
+
+  computers.forEach(c => {
+    c.status = 'available';
+    logAction(c, 'تم جعل الجهاز متاح');
+  });
+
+  labReserved = null;
+  labAvailable = { date: selectedDate, start, end }; // ✅ set available slot
+  renderDashboard();
+  savePCs();
+  renderDayReservations();
+  showToast(`كل المختبر متاح من ${start} إلى ${end}`);
+}
+
+
+// ----------------- Filter -----------------
+function filterStatus(f) { filter = f; renderDashboard(); }
+
+// ----------------- History -----------------
+function renderHistory() {
+  const panel = document.getElementById("historyContent");
+  if (!selectedComputer || !selectedComputer.history || selectedComputer.history.length === 0) {
+    panel.innerHTML = "لا توجد سجلات";
+    return;
+  }
+  panel.innerHTML = selectedComputer.history.map(h => `🕒 ${h.time}: ${h.action}`).join('<br>');
+}
+
+// ----------------- Calendar -----------------
+function renderCalendar() {
+  selectedDate = document.getElementById("calendarDate").value || selectedDate;
+
+  const cal = document.getElementById("calendarContent");
+  cal.innerHTML = "";
+
+  const baseDate = new Date(selectedDate);
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+
+  // First day of the month
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Calendar grid (start with blanks)
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    cal.appendChild(empty);
+  }
+
+  // Days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayDate = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+    const div = document.createElement("div");
+    div.className = "calendar-day" + (dayDate === selectedCalendarDay ? " selected" : "");
+    div.innerText = d;
+
+    div.onclick = () => {
+      selectedCalendarDay = dayDate;
+      renderCalendar();
+      renderDayReservations();
+    };
+
+    cal.appendChild(div);
+  }
+
+  renderDayReservations();
+}
+
+
+function renderDayReservations() {
+  const panel = document.getElementById("dayReservations");
+  panel.innerHTML = '';
+
+  const day = selectedCalendarDay || selectedDate;
+
+  if (labReserved && labReserved.date === day) {
+    panel.innerHTML = `🖥️ كل المختبر محجوز من ${labReserved.start} إلى ${labReserved.end} انظر للأعلى لرؤية تفاصيل الأجهزة`;
+    return;
+  }
+
+  if (labAvailable && labAvailable.date === day) {
+    panel.innerHTML = `🖥️ كل المختبر متاح من ${labAvailable.start} إلى ${labAvailable.end} انظر للأعلى لرؤية تفاصيل الأجهزة`;
+    return;
+  }
+
+  const rows = computers
+    .filter(c => c.reservations && c.reservations[day])
+    .map(c => `🖥️ ${c.name}: ${c.reservations[day].status} (${c.reservations[day].start} - ${c.reservations[day].end})`);
+
+  panel.innerHTML = rows.length ? rows.join('<br>') : "لا توجد حجوزات في هذا اليوم";
+}
+
+
+
+// ----------------- Role Switch -----------------
+function switchRole() {
+  role = document.getElementById("roleSelect").value;
+}
+
+// ----------------- Theme -----------------
+document.getElementById("themeToggle").onclick = () => {
+  document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  updateAnalytics();
+};
+
+// ----------------- Export -----------------
+function exportReport() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(computers, null, 2));
+  const a = document.createElement('a');
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `lab_report_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
 window.reserveComputer = reserveComputer;
 window.markMaintenance = markMaintenance;
 window.markAvailable = markAvailable;
@@ -226,7 +626,8 @@ window.reserveAll = reserveAll;
 window.makeAllAvailable = makeAllAvailable;
 window.filterStatus = filterStatus;
 window.switchRole = switchRole;
-</script>
+window.exportReport = exportReport;
 
+</script>
 </body>
 </html>
